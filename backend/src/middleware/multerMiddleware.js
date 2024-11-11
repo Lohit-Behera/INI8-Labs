@@ -1,6 +1,8 @@
 import multer from "multer";
 import path from "path";
 
+const __dirname = path.resolve();
+
 // Conditionally switch between memory and disk storage
 const storage = process.env.MEMORY === 'true' 
     ? multer.memoryStorage() 

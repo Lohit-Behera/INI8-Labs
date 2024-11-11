@@ -40,8 +40,8 @@ export const resizeImage = async (req, res, next) => {
                         file.filename = `resized-${Date.now()}-${originalName}`;
                     }
                     else {
-                        const imagePath = path.join(__dirname, file.path);
-                        const outputFilePath = path.join(__dirname, "./public/temp", `resized-${Date.now()}-${file.filename}`);
+                        const imagePath = path.join(file.path);
+                        const outputFilePath = path.join(__dirname, "./public/images", `resized-${Date.now()}-${file.filename}`);
 
                         await sharp(imagePath)
                             .resize(newWidth, newHeight)

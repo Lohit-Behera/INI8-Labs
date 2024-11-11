@@ -18,13 +18,10 @@ app.use(express.static('public'));
 app.use('/images', express.static('images'));
 
 // routes import
+import userRouter from "./routes/user.routes.js";
 
 //routes declaration
+app.use("/api/users", userRouter);
 
-app.get("/", (req, res) => {
-    res.status(200).json({
-        message: "Server is running",
-    });
-});
 
 export { app }
