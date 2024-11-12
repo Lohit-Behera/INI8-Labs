@@ -6,13 +6,17 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 
+import { Toaster } from "sonner";
+
 import Layout from "./Layout";
 import HomePage from "./pages/HomePage";
+import CreatePage from "./pages/CreatePage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<HomePage />} />
+      <Route path="/create" element={<CreatePage />} />
     </Route>
   ),
   {
@@ -29,6 +33,7 @@ const router = createBrowserRouter(
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Toaster richColors />
       <RouterProvider
         router={router}
         future={{

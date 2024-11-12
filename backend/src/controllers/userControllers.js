@@ -23,12 +23,11 @@ const createUser = asyncHandler(async (req, res) => {
         return res.status(400).json(new ApiResponse(400, null, "User already exists."));
     }
     
-
     // validate avatar
     if (!avatar) {
         return res.status(400).json(new ApiResponse(400, null, "Please provide an avatar."));
     }
-
+    
     // create user
     const newUser = await User.create({ name, email, dob, avatar });
 

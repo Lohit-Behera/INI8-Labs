@@ -41,7 +41,8 @@ export const resizeImage = async (req, res, next) => {
                     }
                     else {
                         const imagePath = path.join(file.path);
-                        const outputFilePath = path.join(__dirname, "./public/images", `resized-${Date.now()}-${file.filename}`);
+                        const filename = `resized-${Date.now()}-${file.filename}`
+                        const outputFilePath = path.join(__dirname, "./public/images", filename);
 
                         await sharp(imagePath)
                             .resize(newWidth, newHeight)
@@ -51,7 +52,7 @@ export const resizeImage = async (req, res, next) => {
 
                         fs.unlinkSync(imagePath);
                         file.path = outputFilePath;
-                        file.filename = `resized-${Date.now()}-${file.filename}`;
+                        file.filename = filename
                     }
                 }
             }
