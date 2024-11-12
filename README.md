@@ -25,25 +25,6 @@ Clone the repository:
   cd INI8-Labs
 ```
 
-**Running using [Docker](https://www.docker.com/)**
-
-in root directory
-
-```bash
-  docker compose up
-```
-
-Then go to [localhost:5173](http://localhost:5173/) for frontend and [localhost:8000](http://localhost:8000/) for backend
-
-**Running without Docker**
-
-Clone the repository:
-
-```bash
-  git clone https://github.com/Lohit-Behera/INI8-Labs.git
-  cd INI8-Labs
-```
-
 Now change directory to backend
 
 ```bash

@@ -116,6 +116,27 @@ const updateUser = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, newUpdatedUser, "User updated successfully."));
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+    // get user id from params
+    const { userId } = req.params;
+
+    // get user
+    const user = await User.findById(userId);
+
+    // validate user
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, null, "User not found."));
+    }
+
+    // delete avatar
+    fs.unlinkSync(__dirname + "/public/images/" + user.avatar);
+
+    // delete user
+    await User.findByIdAndDelete(userId);
+
+    // send response
+    return res.status(200).json(new ApiResponse(200, null, "User deleted successfully."));
+});
 
 
-export { createUser, getUser, getAllUsers, updateUser };
+export { createUser, getUser, getAllUsers, updateUser, deleteUser };

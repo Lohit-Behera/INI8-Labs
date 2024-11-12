@@ -2,14 +2,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import { fetchGetAllUsers } from "@/features/UserSlice";
+import { fetchDeleteUser, fetchGetAllUsers } from "@/features/UserSlice";
 import { baseUrl } from "@/lib/Proxy";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { SquarePen } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import GlobalLoader from "@/components/GlobalLoader/GlobalLoader";
 import ServerErrorPage from "./Error/ServerErrorPage";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 type User = {
   _id: string;
@@ -40,6 +52,20 @@ function HomePage() {
       dispatch(fetchGetAllUsers());
     }
   }, [updated, dispatch]);
+
+  const handleDelete = (id: string) => {
+    const deleteUserPromise = dispatch(fetchDeleteUser(id)).unwrap();
+    toast.promise(deleteUserPromise, {
+      loading: "Deleting user...",
+      success: (data: any) => {
+        navigate("/?updated=true");
+        return data?.message || "User deleted successfully.";
+      },
+      error: (error: any) => {
+        return error?.message || "Error deleting user.";
+      },
+    });
+  };
   return (
     <>
       {getAllUserStatus === "loading" ? (
@@ -72,13 +98,42 @@ function HomePage() {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => navigate(`/update/${user._id}`)}
-                  >
-                    <SquarePen className="mr-0.5 h-4 w-4" /> Update
-                  </Button>
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => navigate(`/update/${user._id}`)}
+                    >
+                      <SquarePen className="mr-0.5 h-4 w-4" /> Update
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="destructive">
+                          <Trash2 className="mr-0.5 h-4 w-4" /> Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete user and remove your data from our servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(user._id)}
+                            className="bg-destructive hover:bg-destructive/80 text-destructive-foreground"
+                          >
+                            Continue
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               ))}
             </div>

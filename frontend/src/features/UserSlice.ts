@@ -124,6 +124,30 @@ export const fetchUpdateUser = createAsyncThunk(
   }
 );
 
+export const fetchDeleteUser = createAsyncThunk(
+  "user/delete",
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const { data } = await axios.delete(
+        `${baseUrl}/api/users/delete/${userId}`,
+        config
+      );
+      return data;
+    } catch (error: any) {
+      const errorMessage =
+        error.response && error.response.data
+          ? error.response.data.message
+          : error.message;
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -142,12 +166,21 @@ const userSlice = createSlice({
     updateUser: { data: {} },
     updateUserStatus: "idle",
     updateUserError: {},
+
+    deleteUser: {},
+    deleteUserStatus: "idle",
+    deleteUserError: {},
   },
   reducers: {
     resetUpdateUser: (state) => {
       state.updateUser = { data: {} as User };
       state.updateUserStatus = "idle";
       state.updateUserError = {};
+    },
+    resetDeleteUser: (state) => {
+      state.deleteUser = {};
+      state.deleteUserStatus = "idle";
+      state.deleteUserError = {};
     },
   },
   extraReducers: (builder) => {
@@ -202,10 +235,22 @@ const userSlice = createSlice({
       .addCase(fetchUpdateUser.rejected, (state, action) => {
         state.updateUserStatus = "failed";
         state.updateUserError = action.payload || "Failed to update user";
+      })
+      // delete user
+      .addCase(fetchDeleteUser.pending, (state) => {
+        state.deleteUserStatus = "loading";
+      })
+      .addCase(fetchDeleteUser.fulfilled, (state, action) => {
+        state.deleteUserStatus = "succeeded";
+        state.deleteUser = action.payload;
+      })
+      .addCase(fetchDeleteUser.rejected, (state, action) => {
+        state.deleteUserStatus = "failed";
+        state.deleteUserError = action.payload || "Failed to delete user";
       });
   },
 });
 
-export const { resetUpdateUser } = userSlice.actions;
+export const { resetUpdateUser, resetDeleteUser } = userSlice.actions;
 
 export default userSlice.reducer;
