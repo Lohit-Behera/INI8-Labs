@@ -6,6 +6,8 @@ COPY package.json .
 
 RUN npm install
 
+RUN npm i -D nodemon
+
 COPY . .
 
 EXPOSE 5173
