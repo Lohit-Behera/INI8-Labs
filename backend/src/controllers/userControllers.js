@@ -2,6 +2,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/userModel.js";
 import fs from "fs";
+import path from "path";
+
+const __dirname = path.resolve();
 
 const createUser = asyncHandler(async (req, res) => {
     // get data from req.body
@@ -69,4 +72,50 @@ const getAllUsers = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, users, "Users found successfully."));
 });
 
-export { createUser, getUser, getAllUsers };
+const updateUser = asyncHandler(async (req, res) => {
+    // get user id from params
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return res.status(404).json(new ApiResponse(404, null, "User not found."));
+    }
+
+    // get data from req.body 
+    const { name, email, dob } = req.body;
+
+    if (name && name !== "" && name !== user.name) {
+        user.name = name;
+    }
+
+    if (email && email !== "" && email !== user.email) {
+        user.email = email;
+    }
+
+    if (dob && dob !== "" && dob !== user.dob) {
+        user.dob = dob;
+    }
+
+    const avatar = req.file ? req.file.filename : "";
+
+    if (avatar && avatar !== "" && avatar !== user.avatar) {
+        // delete old avatar
+        fs.unlinkSync(__dirname + "/public/images/" + user.avatar);
+        user.avatar = avatar;
+    }
+
+    // update user
+
+    const updatedUser = await user.save({validateBeforeSave: false});
+
+    // validate user
+    const newUpdatedUser = await User.findById(updatedUser._id);
+
+    // send response
+    return res.status(200).json(new ApiResponse(200, newUpdatedUser, "User updated successfully."));
+});
+
+
+
+export { createUser, getUser, getAllUsers, updateUser };

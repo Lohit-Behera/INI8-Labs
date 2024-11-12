@@ -1,8 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, SquarePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,8 @@ const FormSchema = z.object({
 
 function CreatePage() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -80,15 +83,18 @@ function CreatePage() {
         name: data.name,
         email: data.email,
         avatar: data.avatar,
-        dob: format(data.dob, "PPP"),
+        dob: data.dob,
       })
-    );
+    ).unwrap();
     toast.promise(createUserPromise, {
       loading: "Creating user...",
       success: (data: any) => {
+        navigate("/?updated=true");
         return data.message || "User created successfully.";
       },
-      error: "Error creating user.",
+      error: (error) => {
+        return error || error.message || "Error creating user.";
+      },
     });
   }
 
@@ -158,7 +164,7 @@ function CreatePage() {
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-[240px] pl-3 text-left font-normal",
+                            "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -190,7 +196,7 @@ function CreatePage() {
               )}
             />
             <Button type="submit" className="w-full" size="sm">
-              Submit
+              <SquarePlus className="mr-0.5 h-4 w-4" /> Submit
             </Button>
           </form>
         </Form>

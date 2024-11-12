@@ -2,16 +2,27 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseUrl } from "@/lib/Proxy";
 
-type User = {
+type UserDispatch = {
   name: string;
   email: string;
   avatar: File;
+  dob: Date;
+};
+
+type User = {
+  _id: string;
+  name: string;
+  email: string;
+  avatar: string;
   dob: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 };
 
 export const fetchCreateUser = createAsyncThunk(
   "user/create",
-  async (user: User, { rejectWithValue }) => {
+  async (user: UserDispatch, { rejectWithValue }) => {
     try {
       const config = {
         headers: {
@@ -79,6 +90,40 @@ export const fetchGetAllUsers = createAsyncThunk(
   }
 );
 
+export const fetchUpdateUser = createAsyncThunk(
+  "user/update",
+  async (
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+      dob: Date | null;
+      avatar: File | null;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/users/update/${user._id}`,
+        user,
+        config
+      );
+      return data;
+    } catch (error: any) {
+      const errorMessage =
+        error.response && error.response.data
+          ? error.response.data.message
+          : error.message;
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -86,15 +131,25 @@ const userSlice = createSlice({
     createUserStatus: "idle",
     createUserError: {},
 
-    getUser: { data: {} },
+    getUser: { data: {} as User },
     getUserStatus: "idle",
     getUserError: {},
 
     getAllUsers: { data: [] },
     getAllUsersStatus: "idle",
     getAllUsersError: {},
+
+    updateUser: { data: {} },
+    updateUserStatus: "idle",
+    updateUserError: {},
   },
-  reducers: {},
+  reducers: {
+    resetUpdateUser: (state) => {
+      state.updateUser = { data: {} as User };
+      state.updateUserStatus = "idle";
+      state.updateUserError = {};
+    },
+  },
   extraReducers: (builder) => {
     builder
       // createUser
@@ -134,8 +189,23 @@ const userSlice = createSlice({
       .addCase(fetchGetAllUsers.rejected, (state, action) => {
         state.getAllUsersStatus = "failed";
         state.getAllUsersError = action.payload || "Failed to get all users";
+      })
+
+      // updateUser
+      .addCase(fetchUpdateUser.pending, (state) => {
+        state.updateUserStatus = "loading";
+      })
+      .addCase(fetchUpdateUser.fulfilled, (state, action) => {
+        state.updateUserStatus = "succeeded";
+        state.updateUser = action.payload;
+      })
+      .addCase(fetchUpdateUser.rejected, (state, action) => {
+        state.updateUserStatus = "failed";
+        state.updateUserError = action.payload || "Failed to update user";
       });
   },
 });
+
+export const { resetUpdateUser } = userSlice.actions;
 
 export default userSlice.reducer;
